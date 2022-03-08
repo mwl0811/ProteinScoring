@@ -101,5 +101,6 @@ if __name__ == '__main__':
 
         mono_score.append(np.sum(mini_dis))
 
-    print(sum(mono_score)/len(mono_score))
+    final_score = sum(mono_score)/len(mono_score) * -1
+    print(final_score)
 
