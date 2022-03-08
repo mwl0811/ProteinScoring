@@ -69,9 +69,10 @@ if __name__ == '__main__':
 
     # calculate the designed protein
     structure_id = "design"
-    filename = "design/rn_4pn8_0001_sc_1lzj_1_a-L-Fucp-1_0001.pdb"
+    filename = "design/rn_5eza_0001_sc_2vng_2_a-L-Fucp-1_0001.pdb"
     structure = parser.get_structure(structure_id, filename)
     model = structure[0]
+    mono_score = []
 
     chainA = model['A']
     sugar_atom = []
@@ -96,6 +97,9 @@ if __name__ == '__main__':
             cur_dif = abs(dis_mono - dis_original[index])
             if np.sum(cur_dif) < np.sum(mini_dis):
                 mini_dis = cur_dif
-        print(mini_dis)
+        # print(mini_dis)
 
+        mono_score.append(np.sum(mini_dis))
+
+    print(sum(mono_score)/len(mono_score))
 
