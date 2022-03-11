@@ -1,6 +1,7 @@
 # This is a protein scoring program by data modeling.
 
 from Bio.PDB.PDBParser import PDBParser
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 
@@ -64,8 +65,20 @@ if __name__ == '__main__':
             # print(dis_mono)
             dis_original.append(dis_mono)
 
-    # with open("distance_matrix.txt", "w") as f:
-    #     f.write(str(dis_original) + '\n')
+    count = 0
+    for mono_atom in monoacid_dic:
+        database_x = np.array([])
+        count += 1
+        cur_dis = np.array([])
+        for p_list in monoacid_dic[mono_atom]:
+            dis = np.sum(dis_original[p_list])
+            cur_dis = np.append(cur_dis, dis)
+            database_x = np.append(database_x, count)
+        print(cur_dis)
+        plt.scatter(database_x, cur_dis, s=0.5)
+
+    with open("distance_matrix.txt", "w") as f:
+        f.write(str(dis_original) + '\n')
 
     # calculate the designed protein
     structure_id = "design"
@@ -104,3 +117,5 @@ if __name__ == '__main__':
     final_score = sum(mono_score)/len(mono_score) * -1
     print(final_score)
 
+    plt.savefig('specificity.jpg')
+    plt.show()
