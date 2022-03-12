@@ -9,7 +9,7 @@ import os
 if __name__ == '__main__':
     parser = PDBParser(PERMISSIVE=1)
 
-    path = 'database'
+    path = 'database_Fuc'
     path_list = os.listdir(path)
 
 
@@ -19,7 +19,19 @@ if __name__ == '__main__':
         structure_id = "protein" + str(file_count)
         filename = path + '/' + file
         structure = parser.get_structure(structure_id, filename)
-        model_list.append(structure[0])
+        flag = 0
+        for chains in structure[0]:
+            if chains.get_id() == 'A':
+                flag += 1
+            if chains.get_id() == 'B':
+                flag += 1
+            if flag == 2:
+                model_list.append(structure[0])
+                break
+        if flag < 2:
+            os.remove(filename)
+
+
 
     dis_original = []
     monoacid_dic = {}
@@ -66,23 +78,29 @@ if __name__ == '__main__':
             dis_original.append(dis_mono)
 
     count = 0
+    name_list = []
     for mono_atom in monoacid_dic:
-        database_x = np.array([])
-        count += 1
-        cur_dis = np.array([])
-        for p_list in monoacid_dic[mono_atom]:
-            dis = np.sum(dis_original[p_list])
-            cur_dis = np.append(cur_dis, dis)
-            database_x = np.append(database_x, count)
-        print(cur_dis)
-        plt.scatter(database_x, cur_dis, s=0.5)
+        if mono_atom != 'PCA' and mono_atom != 'OCS':
+            database_x = np.array([])
+            name_list.append(mono_atom)
+            count += 1
+            cur_dis = np.array([])
+            for p_list in monoacid_dic[mono_atom]:
+                dis = np.sum(dis_original[p_list])
+                cur_dis = np.append(cur_dis, dis)
+                database_x = np.append(database_x, count)
+            print(cur_dis)
+            plt.scatter(database_x, cur_dis, s=0.5)
+
+    scale_ls = range(1, len(name_list)+1)
+    plt.xticks(scale_ls, name_list, rotation=-60)
 
     with open("distance_matrix.txt", "w") as f:
         f.write(str(dis_original) + '\n')
 
     # calculate the designed protein
     structure_id = "design"
-    filename = "design/rn_5eza_0001_sc_2vng_2_a-L-Fucp-1_0001.pdb"
+    filename = "design/rn_4pn9_0001_sc_1s3k_1_a-L-Fucp-2_0001.pdb"
     structure = parser.get_structure(structure_id, filename)
     model = structure[0]
     mono_score = []
