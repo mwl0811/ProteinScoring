@@ -98,42 +98,50 @@ if __name__ == '__main__':
     with open("distance_matrix.txt", "w") as f:
         f.write(str(dis_original) + '\n')
 
+
+
+
+
     # calculate the designed protein
-    structure_id = "design"
-    filename = "design/rn_4pn9_0001_sc_1s3k_1_a-L-Fucp-2_0001.pdb"
-    structure = parser.get_structure(structure_id, filename)
-    model = structure[0]
-    mono_score = []
+    path = 'design'
+    path_list = os.listdir(path)
 
-    chainA = model['A']
-    sugar_atom = []
-    for residue in chainA:
-        for atom in residue:
-            if atom.get_name() in sugar_dic:
-                sugar_atom.append(atom)
+    for file in path_list:
+        structure_id = "protein" + str(file_count)
+        filename = path + '/' + file
+        structure = parser.get_structure(structure_id, filename)
+        model = structure[0]
+        mono_score = []
 
-    chainB = model['B']
-    for residue in chainB:
-        mono_name = residue.get_resname()
-        dis_mono = np.zeros((4, sugar_size))
-        for atom in residue:
-            atom_name = atom.get_name()
-            if atom_name in atom_dic:
-                for atom_sugar in sugar_atom:
-                    dis_mono[atom_dic[atom_name]][sugar_dic[atom_sugar.get_name()]] = atom_sugar - atom
+        chainA = model['A']
+        sugar_atom = []
+        for residue in chainA:
+            for atom in residue:
+                if atom.get_name() in sugar_dic:
+                    sugar_atom.append(atom)
 
-        mini_dis = np.linspace(100, 100, sugar_size*4)
-        mini_dis.resize(4, sugar_size)
-        for index in monoacid_dic[mono_name]:
-            cur_dif = abs(dis_mono - dis_original[index])
-            if np.sum(cur_dif) < np.sum(mini_dis):
-                mini_dis = cur_dif
-        # print(mini_dis)
+        chainB = model['B']
+        for residue in chainB:
+            mono_name = residue.get_resname()
+            dis_mono = np.zeros((4, sugar_size))
+            for atom in residue:
+                atom_name = atom.get_name()
+                if atom_name in atom_dic:
+                    for atom_sugar in sugar_atom:
+                        dis_mono[atom_dic[atom_name]][sugar_dic[atom_sugar.get_name()]] = atom_sugar - atom
 
-        mono_score.append(np.sum(mini_dis))
+            mini_dis = np.linspace(100, 100, sugar_size*4)
+            mini_dis.resize(4, sugar_size)
+            for index in monoacid_dic[mono_name]:
+                cur_dif = abs(dis_mono - dis_original[index])
+                if np.sum(cur_dif) < np.sum(mini_dis):
+                    mini_dis = cur_dif
+            # print(mini_dis)
 
-    final_score = sum(mono_score)/len(mono_score) * -1
-    print(final_score)
+            mono_score.append(np.sum(mini_dis))
+
+        final_score = sum(mono_score)/len(mono_score) * -1
+        print(file, final_score)
 
     plt.savefig('specificity.jpg')
     plt.show()
